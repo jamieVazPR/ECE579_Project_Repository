@@ -1,5 +1,5 @@
-Project Description: 
-The project focuses on challenging current trending AI models within the medical field to verify for improvement in surgical applications. With a wide margin of processes and criterias, it is incredibly difficult to attain a general model for this purpose, therefore the scope is narrowed down to a certain section of the surgical listing. The work will focus on Laparoscopic Cholecystectomy and its current AI applications. Our challenge is to compare proposed methods with updated computer vision models to increase the level of identification accuracy.
+### Project Description: 
+##### The project focuses on challenging current trending AI models within the medical field to verify for improvement in surgical applications. With a wide margin of processes and criterias, it is incredibly difficult to attain a general model for this purpose, therefore the scope is narrowed down to a certain section of the surgical listing. The work will focus on Laparoscopic Cholecystectomy and its current AI applications. Our challenge is to compare proposed methods with updated computer vision models to increase the level of identification accuracy.
 
 ### Project Problem Statement: 
 ##### Project aims to review if hyperparameter tuning a Computer Vision Model, i.e. YOLO in this case scenario, can showcase improvement in classifying the CholecT50 content higher than the paper [https://arxiv.org/abs/2109.03223] illustrates. 
