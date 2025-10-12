@@ -1,19 +1,29 @@
 Project Description: 
 The project focuses on challenging current trending AI models within the medical field to verify for improvement in surgical applications. With a wide margin of processes and criterias, it is incredibly difficult to attain a general model for this purpose, therefore the scope is narrowed down to a certain section of the surgical listing. The work will focus on Laparoscopic Cholecystectomy and its current AI applications. Our challenge is to compare proposed methods with updated computer vision models to increase the level of identification accuracy.
 
-Data Description with Example Datasets: 
-CholecSeg8k Data-
-Semantic segmentation data of endoscopic images with 13 classes, 8080 frames/images from 17 laparoscopic cholecystectomy surgery videos. https://www.kaggle.com/datasets/newslab/cholecseg8k
+### Project Problem Statement: 
+##### Project aims to review if hyperparameter tuning a Computer Vision Model, i.e. YOLO in this case scenario, can showcase improvement in classifying the CholecT50 content higher than the paper [https://arxiv.org/abs/2109.03223] illustrates. 
 
-CholecTrack20 Data-
-Github containing multi-perspective endoscopic video frames of 20 laparoscopic cholecystectomy surgery videos; with 7 classes and including extensive bounding box labels
-https://github.com/CAMMA-public/cholectrack20
+### Project Hypothesis: 
+##### WE hypothesize that if we apply the current trending YOLOv12 version onto the CholecT50, our tuned model will be able to classify the content such as instruments, targets and even phases (actions). Since the paper applies a custom model, the application of other robust Computer Vision models such as YOLO peaques interest in the medical field. 
 
-CholecT50 Data-
-Github containing laparoscopic cholecystectomy videos with annotations for each frame. There are 50 videos in total with 1 frame extracted per fps. 
-https://github.com/CAMMA-public/cholect50
+### Selected Dataset:
+##### Originally we had three datasets to select from such as :
+1) CholecSeg8k
+2) CholecTrack20
+3) CholecT50
 
-Employed Tools:
-Random Forests and Gradient Boosting Machines: These are powerful, interpretable models often used for risk assessment. For example, they can analyze a patient's medical history and vitals to predict the risk of complications like blood loss or infection during or after a procedure.
-GPT (Generative Pre-trained Transformer) models (e.g., GPT-4o): These models can process vast amounts of medical literature and patient data to assist with tasks such as clinical documentation, surgical education etc.
-You Only Look Once (YOLO): These are powerful computer vision models that can interpret the image/video content provided to assist in decision making, labeling, target analysis/tracking, data assessment, and more. For example, they can identify whether a patient is suffering bleeding during surgery or identify radiological imagery for any anomaly/underlying issue in patient health.
+##### Due to the size of these datasets being massive to run on LOCAL MACHINES, we have narrowed our project to encompass 1 dataset which is >CHOLECT50<
+
+### Employed Tools:
+##### We have selected the You Only Look Once (YOLO) Computer Vision Architecture to run on the selected dataset for reviewing possible improvements and extending usage in medical field to to other 'generalized' models. Generalized in this case being computer vision models not originally built for this case scenario. 
+
+### Team:
+##### Team is composed of the following members:
+1) Selase Doku
+2) Jamie Vazquez
+3) Tintu Varughese
+
+### References:
+##### The project was made possible thanks to the original github for CholecT50: https://github.com/CAMMA-public/cholect50 
+C.I. Nwoye, T. Yu, C. Gonzalez, B. Seeliger, P. Mascagni, D. Mutter, J. Marescaux, N. Padoy. Rendezvous: Attention Mechanisms for the Recognition of Surgical Action Triplets in Endoscopic Videos. Medical Image Analysis, 78, (2022) 102433.
