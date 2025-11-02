@@ -1,0 +1,142 @@
+import cv2
+import os
+import shutil
+import pathlib
+from skimage.metrics import structural_similarity as ssim
+
+SOURCE_FOLDER = pathlib.Path.home() / "Downloads/Combined_Images"
+OUTPUT_BASE_FOLDER = pathlib.Path.home() / "Downloads/filter_duplicates"
+
+# BLURRY: (Laplacian variance)
+BLUR_THRESHOLD = 500.0
+
+# DARK: (Mean pixel intensity, 0=black, 255=white)
+# Moves images that are almost black.
+# Good start: 20
+DARK_THRESHOLD = 20
+
+# BRIGHT: (Mean pixel intensity, 0=black, 255=white)
+# Moves images that are "blown out" or all-white.
+# Good start: 235
+BRIGHT_THRESHOLD = 235
+
+# DUPLICATES: (Structural Similarity Index, 1.0 = identical)
+# Moves images that are "almost identical" to the previous one.
+# Good start: 0.98 (meaning 98% similar)
+DUPLICATE_THRESHOLD = 0.98
+
+IMAGE_EXTENSIONS = ('.jpg', '.jpeg', '.png')
+
+
+def create_folders():
+    """Creates the output directory structure."""
+    global paths
+    paths = {
+        "review": OUTPUT_BASE_FOLDER / "00_needs_manual_review",
+        "blurry": OUTPUT_BASE_FOLDER / "01_blurry",
+        "dark": OUTPUT_BASE_FOLDER / "02_dark",
+        "bright": OUTPUT_BASE_FOLDER / "03_bright",
+        "dupes": OUTPUT_BASE_FOLDER / "04_duplicates",
+    }
+
+    print(f"Creating output folders in: {OUTPUT_BASE_FOLDER}\n")
+    OUTPUT_BASE_FOLDER.mkdir(parents=True, exist_ok=True)
+    for key, path in paths.items():
+        path.mkdir(exist_ok=True)
+
+
+def analyze_and_sort_images():
+    """
+    Analyzes all images and sorts them into the folders.
+    The order of checks is important (first match wins).
+    """
+    create_folders()
+
+    # Get all image files and, CRUCIALLY, sort them by name
+    print(f"Scanning and sorting files in: {SOURCE_FOLDER}...")
+    image_files = sorted([
+        f for f in SOURCE_FOLDER.rglob('*')
+        if f.is_file() and f.suffix.lower() in IMAGE_EXTENSIONS
+    ])
+
+    if not image_files:
+        print("No images found. Exiting.")
+        return
+
+    print(f"Found {len(image_files)} images. Starting analysis...\n")
+
+    # Variables to track counts and the previous frame
+    counts = {k: 0 for k in paths}
+    previous_gray = None
+
+    for i, file_path in enumerate(image_files):
+        try:
+            # Read image and convert to grayscale
+            image = cv2.imread(str(file_path))
+            if image is None:
+                print(f"Skipped (cannot read): {file_path.name}")
+                continue
+
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+            # --- Check 1: Blurriness ---
+            lap_var = cv2.Laplacian(gray, cv2.CV_64F).var()
+            if lap_var < BLUR_THRESHOLD:
+                shutil.move(str(file_path), paths["blurry"] / file_path.name)
+                counts["blurry"] += 1
+                print(f"Moved (Blurry, {lap_var:.1f}): {file_path.name}")
+                # Don't set previous_gray; treat this as a "bad" frame
+                continue
+
+                # --- Check 2: Darkness ---
+            mean_intensity = gray.mean()
+            if mean_intensity < DARK_THRESHOLD:
+                shutil.move(str(file_path), paths["dark"] / file_path.name)
+                counts["dark"] += 1
+                print(f"Moved (Dark, {mean_intensity:.1f}): {file_path.name}")
+                continue
+
+                # --- Check 3: Brightness ---
+            if mean_intensity > BRIGHT_THRESHOLD:
+                shutil.move(str(file_path), paths["bright"] / file_path.name)
+                counts["bright"] += 1
+                print(f"Moved (Bright, {mean_intensity:.1f}): {file_path.name}")
+                continue
+
+            # --- Check 4: Duplicates (SSIM) ---
+            if previous_gray is not None:
+                # Ensure images are the same size for comparison
+                if previous_gray.shape != gray.shape:
+                    print(f"Skipping duplicate check for {file_path.name} (size mismatch).")
+                else:
+                    score = ssim(previous_gray, gray)
+                    if score > DUPLICATE_THRESHOLD:
+                        shutil.move(str(file_path), paths["dupes"] / file_path.name)
+                        counts["dupes"] += 1
+                        print(f"Moved (Duplicate, {score:.2f}): {file_path.name}")
+                        # IMPORTANT: Do not update previous_gray.
+                        # We want to find duplicates of the *last good frame*.
+                        continue
+
+            # --- If it passes all checks ---
+            shutil.move(str(file_path), paths["review"] / file_path.name)
+            counts["review"] += 1
+            # This frame is "good," so it becomes the new frame to check against
+            previous_gray = gray
+
+        except Exception as e:
+            print(f"Error processing {file_path.name}: {e}")
+
+    # --- Print Summary ---
+    print("\n--- Sorting Complete ---")
+    print(f"Moved to 00_needs_manual_review: {counts['review']}")
+    print(f"Moved to 01_blurry: {counts['blurry']}")
+    print(f"Moved to 02_dark: {counts['dark']}")
+    print(f"Moved to 03_bright: {counts['bright']}")
+    print(f"Moved to 04_duplicates: {counts['dupes']}")
+    print("\nNext Step: Manually review the '00_needs_manual_review' folder.")
+
+
+# Run the main function
+if __name__ == "__main__":
+    analyze_and_sort_images()
