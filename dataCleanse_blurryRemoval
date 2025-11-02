@@ -1,0 +1,96 @@
+import cv2
+import os
+import shutil
+import pathlib
+
+# --- Configuration ---
+
+# 1. FOLDER PATHS
+SOURCE_FOLDER = pathlib.Path.home() / "Downloads/Combined_Images"
+BLURRY_FOLDER = pathlib.Path.home() / "Downloads/Blurry_Images"
+
+# 2. SET THRESHOLD
+#    This is the most important setting.
+#    - A lower number (e.g., 70) means "move only very blurry images".
+#    - A higher number (e.g., 150) means "move anything slightly blurry".
+
+
+# 3. SET IMAGE TYPES
+IMAGE_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.bmp', '.webp')
+
+def analyze_and_move_images(thresh):
+    """
+    Finds blurry images in the SOURCE_FOLDER and moves them
+    to the blurry_folder.
+    """
+    blurry_folder = pathlib.Path.home() / f"Downloads/Blurry_Images{thresh}"
+    print(blurry_folder)
+    print(f"Scanning folder: {SOURCE_FOLDER}")
+    print(f"Moving blurry images (score < {thresh}) to: {blurry_folder}")
+
+    # Create the destination folder if it doesn't exist
+    blurry_folder.mkdir(parents=True, exist_ok=True)
+
+    processed_count = 0
+    moved_count = 0
+
+    # Use rglob to search all subfolders recursively
+    for file_path in SOURCE_FOLDER.rglob('*'):
+        # Check if it's a file and has a valid image extension
+        if file_path.is_file() and file_path.suffix.lower() in IMAGE_EXTENSIONS:
+
+            try:
+                # Read the image
+                image = cv2.imread(str(file_path))
+
+                # Handle cases where the image file is corrupted or unreadable
+                if image is None:
+                    print(f"Skipped (cannot read): {file_path.name}")
+                    continue
+
+                # Convert to grayscale (color is not needed for blur detection)
+                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+                # Calculate the variance of the Laplacian
+                # This single value is our "blurriness score"
+                lap_var = cv2.Laplacian(gray, cv2.CV_64F).var()
+
+                processed_count += 1
+
+                # --- The Decision ---
+                if lap_var < thresh:
+                    print(f"  BLURRY (Score: {lap_var:.2f}): {file_path.name}")
+
+                    # Create a new, unique name to avoid conflicts
+                    # e.g., "FolderName_ImageName.jpg"
+                    parent_name = file_path.parent.name
+                    file_name = file_path.name
+
+                    # Prevent prepending the source folder's name if the file is in the root
+                    if file_path.parent == SOURCE_FOLDER:
+                        new_name = file_name
+                    else:
+                        new_name = f"{parent_name}_{file_name}"
+
+                    dest_path = blurry_folder / new_name
+
+                    # Move the file
+                    shutil.move(str(file_path), str(dest_path))
+                    moved_count += 1
+
+            except Exception as e:
+                print(f"Error processing {file_path.name}: {e}")
+
+    print("\n--- Analysis Complete ---")
+    print(f"Total images processed: {processed_count}")
+    print(f"Total images moved: {moved_count}")
+
+  if __name__ == "__main__":
+    # BLUR_THRESHOLD = 100
+    # analyze_and_move_images(BLUR_THRESHOLD)
+    # BLUR_THRESHOLD = 150
+    # analyze_and_move_images(BLUR_THRESHOLD)
+    # BLUR_THRESHOLD = 200
+    # analyze_and_move_images(BLUR_THRESHOLD)
+    BLUR_THRESHOLD = 500
+    analyze_and_move_images(BLUR_THRESHOLD)
