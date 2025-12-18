@@ -5,7 +5,7 @@
 ##### Project aims to review if hyperparameter tuning a Computer Vision Model, i.e. YOLO in this case scenario, can showcase improvement in classifying the CholecT50 content higher than the paper [https://arxiv.org/abs/2109.03223] illustrates. 
 
 ### Project Hypothesis: 
-##### WE hypothesize that if we apply the current trending YOLOv12 version onto the CholecT50, our tuned model will be able to classify the content such as instruments, targets and even phases (actions). Since the paper applies a custom model, the application of other robust Computer Vision models such as YOLO peaques interest in the medical field. 
+##### WE hypothesize that if we apply the current trending YOLOv11-CLS version onto the CholecT50, our tuned model will be able to classify the content such as instruments, targets and even phases (actions). Since the paper applies a custom model, the application of other robust Computer Vision models such as YOLO peaques interest in the medical field. 
 
 ### Selected Dataset:
 ##### Originally we had three datasets to select from such as :
