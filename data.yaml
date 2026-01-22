@@ -1,5 +1,5 @@
 # CholecT50 Classification YAML
-path: /Users/Cake-/Documents/Umich_Personal/Final Fall 2025 Term/ECE579/Project Files/Model_Files/YOLO_dataset
+path: ./Model_Files/YOLO_dataset
 train: train
 val: val
 test: test
@@ -108,4 +108,5 @@ names: [
   'scissors,dissect,omentum',
   'scissors,null-verb,null-target',
 ]
+
 
